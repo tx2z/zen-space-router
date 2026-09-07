@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Zen Space Router",
+  "version": "0.1.0",
+  "description": "Routes incoming URLs to the right Zen workspace via container-tab rules.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zen-space-router@caosmental.com",
+      "strict_min_version": "115.0"
+    }
+  },
+  "permissions": [
+    "tabs",
+    "webRequest",
+    "webRequestBlocking",
+    "contextualIdentities",
+    "storage",
+    "cookies",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  }
+}

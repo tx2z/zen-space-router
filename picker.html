@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Zen Space Router</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="picker-slot"><main class="dialog picker-dialog" role="dialog" aria-labelledby="dialog-title">
+    <h1 id="dialog-title" class="visually-hidden">Open in which space?</h1>
+    <div class="picker-header" id="url-block">
+      <div class="header-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+      </div>
+      <div class="header-text">
+        <p class="url-line">
+          <span class="origin-text" id="origin-text" dir="ltr"></span><span class="path-text" id="path-text"></span>
+        </p>
+        <details id="full-url-details" class="full-url-details">
+          <summary>Show full URL</summary>
+          <p class="full-url-text" id="full-url-text" dir="ltr"></p>
+        </details>
+      </div>
+    </div>
+    <div class="hairline" aria-hidden="true"></div>
+    <ul class="option-list" id="row-list"></ul>
+    <p id="error-text" class="error-text picker-error" role="alert" hidden></p>
+    <div class="hairline" aria-hidden="true"></div>
+    <div class="bottom-bar">
+      <div class="checkbox-row">
+        <label class="checkbox-field" id="remember-row">
+          <input type="checkbox" id="remember-checkbox" />
+          <span id="remember-label">Remember for this domain</span>
+        </label>
+        <label class="checkbox-field" id="subdomains-row" hidden>
+          <input type="checkbox" id="subdomains-checkbox" aria-keyshortcuts="s" />
+          <span id="subdomains-label">Include all subdomains</span>
+        </label>
+      </div>
+      <p class="footer" id="footer-text">
+        <kbd class="key-chip key-chip--sm">ESC</kbd> Cancel
+        <span aria-hidden="true">&middot;</span>
+        <kbd class="key-chip key-chip--sm">R</kbd> Remember
+        <span aria-hidden="true">&middot;</span>
+        <kbd class="key-chip key-chip--sm">S</kbd> Subdomains
+      </p>
+    </div>
+  </main></div>
+  <script src="picker.js"></script>
+</body>
+</html>

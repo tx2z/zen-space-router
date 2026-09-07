@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Zen Space Router Options</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="dialog options-dialog">
+    <h1>Zen Space Router</h1>
+
+    <p id="fatal-error-text" class="error-text" role="alert" hidden></p>
+
+    <div class="options-section">
+      <div class="toggle-row">
+        <label for="enabled-checkbox">Enable routing</label>
+        <input type="checkbox" id="enabled-checkbox" />
+      </div>
+      <div class="toggle-row">
+        <label for="route-typed-checkbox">Also ask for URLs typed into a new tab</label>
+        <input type="checkbox" id="route-typed-checkbox" />
+      </div>
+      <p class="option-hint">
+        Off by default. External links arrive as a background tab; typed URLs
+        arrive as the active tab. This distinction was verified only in Zen.
+      </p>
+    </div>
+
+    <div class="options-section">
+      <h2 class="section-title">Rules</h2>
+      <table id="rules-table" class="rules-table">
+        <thead>
+          <tr>
+            <th scope="col">Domain</th>
+            <th scope="col">Container</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody id="rules-tbody"></tbody>
+      </table>
+      <p class="option-hint">A rule for example.com also matches all its subdomains.</p>
+
+      <p id="add-rule-error-text" class="error-text" role="alert" hidden></p>
+
+      <form class="add-rule-form" id="add-rule-form">
+        <label for="new-domain-input" class="visually-hidden">Domain</label>
+        <div class="input-wrap">
+          <input
+            type="text"
+            id="new-domain-input"
+            placeholder="example.com"
+            required
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            inputmode="url"
+          />
+        </div>
+        <label for="new-container-select" class="visually-hidden">Container</label>
+        <select id="new-container-select" class="select"></select>
+        <button type="submit" id="add-rule-button" class="btn btn-primary">Add</button>
+      </form>
+    </div>
+  </main>
+  <script src="options.js"></script>
+</body>
+</html>

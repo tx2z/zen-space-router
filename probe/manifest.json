@@ -1,0 +1,25 @@
+{
+  "manifest_version": 2,
+  "name": "zen-space-router-probe",
+  "version": "0.0.1",
+  "description": "Probe extension that logs browser events for zen-space-router experiments.",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "zen-space-router-probe@caosmental.com"
+    }
+  },
+  "permissions": [
+    "tabs",
+    "webNavigation",
+    "webRequest",
+    "webRequestBlocking",
+    "contextualIdentities",
+    "cookies",
+    "storage",
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  }
+}

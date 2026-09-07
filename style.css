@@ -1,0 +1,581 @@
+/* Visual language modeled after Zen Browser's native dialogs
+   (zen-theme.css / zen-panels/dialog.css / zen-buttons.css / zen-animations.css). */
+
+:root {
+  color-scheme: light dark;
+
+  --page-bg: rgb(235, 235, 235);
+  --dialog-bg: #fafbff;
+  --dialog-border: rgba(0, 0, 0, 0.4);
+  --dialog-shadow: 0 10px 8px rgba(0, 0, 0, 0.15), 0 2px 40px rgba(0, 0, 0, 0.08);
+  --hairline: rgba(0, 0, 0, 0.1);
+  --hover-chip: rgba(0, 0, 0, 0.06);
+  --input-surface: rgba(0, 0, 0, 0.05);
+  --input-border: rgb(204, 204, 204);
+  --text: #1c1c1c;
+  --text-muted: rgba(28, 28, 28, 0.5);
+  --accent: #4a63d6;
+  --danger: #d70022;
+  --border-contrast: rgba(0, 0, 0, 0.25);
+  --key-chip-bg: rgba(0, 0, 0, 0.12);
+
+  --btn-primary-bg: #1c1c1c;
+  --btn-primary-text: #fafbff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page-bg: #1b1b1b;
+    --dialog-bg: #1c1c1c;
+    --dialog-border: #1c1c1c;
+    --dialog-shadow: 0 10px 8px rgba(0, 0, 0, 0.15), 0 2px 40px rgba(0, 0, 0, 0.08);
+    --hairline: rgba(255, 255, 255, 0.12);
+    --hover-chip: rgba(255, 255, 255, 0.08);
+    --input-surface: rgba(255, 255, 255, 0.05);
+    --input-border: rgb(66, 65, 77);
+    --text: #e6e6e6;
+    --text-muted: rgba(230, 230, 230, 0.5);
+    --accent: #8ea2ff;
+    --danger: #ff6a6a;
+    --border-contrast: rgba(255, 255, 255, 0.3);
+    --key-chip-bg: rgba(255, 255, 255, 0.18);
+
+    --btn-primary-bg: #dddddd;
+    --btn-primary-text: #1c1c1c;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", Roboto, sans-serif;
+  font-size: 14px;
+  background: var(--page-bg);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* Picker page: mimics Zen's floating URL bar. The popup is centred in the
+   viewport as if it were at least 333px tall, matching ZenUIManager's
+   --zen-urlbar-top formula. */
+body:has(.picker-dialog) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.picker-slot {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  min-height: 333px;
+  width: min(calc(100vw / 1.5), 750px);
+}
+
+/* --- Dialog surface --- */
+
+.dialog {
+  background: var(--dialog-bg);
+  border: 0.5px solid var(--dialog-border);
+  border-radius: 16px;
+  corner-shape: superellipse(1.3);
+  box-shadow: var(--dialog-shadow);
+  padding: 1.6rem;
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .dialog {
+    outline: 1px solid rgba(168, 168, 169, 0.5);
+    outline-offset: -2px;
+  }
+}
+
+.options-dialog {
+  max-width: 640px;
+}
+
+.picker-dialog {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  gap: 0;
+  border-radius: 12px;
+}
+
+.dialog h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+@media not (prefers-reduced-motion: reduce) {
+  .dialog {
+    animation: zen-dialog-fade-in 0.3s ease-out;
+  }
+}
+
+@keyframes zen-dialog-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.error-text {
+  font-size: 13px;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger), transparent 90%);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin: 0;
+}
+
+.picker-error {
+  margin: 0 24px 12px;
+}
+
+/* --- Picker header (URL bar row) --- */
+
+.picker-header {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  column-gap: 12px;
+  min-height: 62px;
+  padding: 8px 12px 8px 20px;
+}
+
+.header-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  opacity: 0.6;
+}
+
+.header-text {
+  min-width: 0;
+}
+
+.url-line {
+  display: flex;
+  align-items: baseline;
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 0;
+}
+
+.origin-text {
+  font-size: 19px;
+  font-weight: 500;
+  flex-shrink: 0;
+  margin: 0;
+  unicode-bidi: isolate-override;
+}
+
+.path-text {
+  font-size: 19px;
+  font-weight: 400;
+  opacity: 0.5;
+  margin: 0 0 0 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.full-url-text {
+  font-size: 12px;
+  color: var(--text-muted);
+  word-break: break-all;
+  margin: 4px 0 0;
+  unicode-bidi: isolate-override;
+}
+
+.full-url-details {
+  margin-top: 4px;
+}
+
+.full-url-details summary {
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+/* --- Hairline separators (picker) --- */
+
+.hairline {
+  height: 1px;
+  margin: 0;
+  background: var(--hairline);
+}
+
+/* --- Bottom bar (checkboxes + key hints) --- */
+
+.bottom-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 10px 20px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.checkbox-field input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  margin: 0;
+}
+
+/* --- Option list (container / space picker) --- */
+
+.option-list {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+
+.option-item {
+  margin: 0;
+}
+
+.row-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 24px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.option-card {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  column-gap: 12px;
+  width: 100%;
+  height: 48px;
+  padding: 0 8px 0 10px;
+  margin: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: scale 0.2s, background 0.15s;
+}
+
+.option-card:hover {
+  background: var(--hover-chip);
+}
+
+.option-card:focus-visible {
+  outline: none;
+  background: var(--hover-chip);
+}
+
+.option-card:active {
+  scale: 0.99;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  justify-self: center;
+  flex-shrink: 0;
+}
+
+.dot--hollow {
+  background: none;
+  border: 1.5px solid currentColor;
+  opacity: 0.5;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 500;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.option-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-self: end;
+}
+
+.current-label {
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.key-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  color: var(--text);
+  background: var(--key-chip-bg);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.key-chip--sm {
+  width: 22px;
+  height: 22px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* --- Footer hints --- */
+
+.footer {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* --- Buttons --- */
+
+.btn {
+  border: none;
+  border-radius: 13px;
+  corner-shape: superellipse(1.3);
+  padding: 0.6rem 1.2rem;
+  font: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: scale 0.2s, background 0.15s, opacity 0.15s, color 0.15s;
+}
+
+.btn:active {
+  scale: 0.98;
+}
+
+.btn-primary {
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+.btn-primary:hover {
+  opacity: 0.95;
+}
+
+.btn-primary:active {
+  opacity: 0.9;
+}
+
+.btn-ghost {
+  background: color-mix(in srgb, currentColor, transparent 90%);
+  color: var(--text);
+}
+
+.btn-ghost:hover {
+  background: color-mix(in srgb, currentColor, transparent 95%);
+}
+
+.btn-ghost:active {
+  background: color-mix(in srgb, currentColor, transparent 90%);
+}
+
+.btn-danger:hover {
+  color: var(--danger);
+}
+
+:focus-visible {
+  outline: 2px solid var(--border-contrast);
+  outline-offset: 2px;
+}
+
+.option-card:focus-visible {
+  outline: none;
+}
+
+/* --- Options page --- */
+
+.options-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.options-section + .options-section {
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  opacity: 0.6;
+  margin: 0 0 0.2rem;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--hairline);
+}
+
+.toggle-row:last-of-type {
+  border-bottom: none;
+}
+
+.toggle-row label {
+  font-size: 14px;
+}
+
+.toggle-row input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.option-hint {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.rules-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rules-table th,
+.rules-table td {
+  text-align: left;
+  padding: 0.5rem 0.4rem;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 13px;
+}
+
+.rules-table th {
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+.rules-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.add-rule-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.input-wrap {
+  flex: 1;
+  min-width: 160px;
+  background: var(--input-surface);
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  corner-shape: superellipse(1.3);
+  padding: 0 0.6rem;
+}
+
+.input-wrap input[type="text"] {
+  width: 100%;
+  padding: 0.5rem 0;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+}
+
+.input-wrap input[type="text"]:focus {
+  outline: none;
+}
+
+.input-wrap:has(input[aria-invalid="true"]) {
+  border-color: var(--danger);
+}
+
+.select {
+  padding: 0.5rem 1.8rem 0.5rem 0.6rem;
+  border: 1px solid var(--input-border);
+  border-radius: 10px;
+  corner-shape: superellipse(1.3);
+  background-color: var(--input-surface);
+  color: var(--text);
+  font: inherit;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23808080' stroke-width='1.5' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.6rem center;
+  background-size: 10px 6px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

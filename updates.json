@@ -1,0 +1,12 @@
+{
+  "addons": {
+    "zen-space-router@caosmental.com": {
+      "updates": [
+        {
+          "version": "0.1.2",
+          "update_link": "https://github.com/tx2z/zen-space-router/releases/download/v0.1.2/zen-space-router-0.1.2.xpi"
+        }
+      ]
+    }
+  }
+}

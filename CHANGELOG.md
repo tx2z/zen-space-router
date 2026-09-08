@@ -6,6 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-09-08
+
+### Added
+
+- Automatic updates via a self-hosted update manifest (`updates.json` in
+  this repository).
+
 ## [0.1.1] - 2026-09-08
 
 First public release.
@@ -47,6 +54,7 @@ published.
 - Signed, unlisted Mozilla Add-ons release process for self-distribution via
   a downloadable `.xpi`.
 
-[Unreleased]: https://github.com/tx2z/zen-space-router/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/tx2z/zen-space-router/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/tx2z/zen-space-router/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/tx2z/zen-space-router/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/tx2z/zen-space-router/compare/d9260c4...v0.1.0

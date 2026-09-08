@@ -32,7 +32,8 @@ The options page, listing saved domain rules.
 2. **Install**: download `zen-space-router-<version>.xpi` from the
    [Releases page](https://github.com/tx2z/zen-space-router/releases), then
    drag it onto a Zen window (or open `about:addons` → the gear menu →
-   "Install Add-on From File" and select it).
+   "Install Add-on From File" and select it). Updates are automatic from
+   then on (the extension checks this repository's `updates.json`).
 3. In Zen, give each space a container: open that space's settings and
    assign it one.
 4. In Zen settings, enable "Switch to workspace where container is set as

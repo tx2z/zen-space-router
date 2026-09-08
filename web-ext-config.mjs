@@ -19,6 +19,7 @@ export default {
     "CHANGELOG.md",
     "CONTRIBUTING.md",
     "SECURITY.md",
+    "updates.json",
   ],
   build: {
     overwriteDest: true,

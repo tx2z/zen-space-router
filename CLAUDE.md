@@ -88,17 +88,21 @@ workspace API, so "open in space X" means opening the tab with the
   1. Bump `version` in `manifest.json`, `package.json` and `CHANGELOG.md`
      (Mozilla rejects a version that was already signed, even for
      unlisted).
-  2. `npm run lint` must report 0 errors and 0 warnings.
-  3. `npm run build` produces the zip in `web-ext-artifacts/`
+  2. Add the new version to `updates.json` (`version` and `update_link` to
+     the release asset).
+  3. `npm run lint` must report 0 errors and 0 warnings.
+  4. `npm run build` produces the zip in `web-ext-artifacts/`
      (gitignored); `web-ext-config.mjs` excludes `probe/` and repo metadata.
-  4. Sign with the command in `docs/TECHNICAL.md` ("Releasing"). Credentials come from the maintainer's
+  5. Sign with the command in `docs/TECHNICAL.md` ("Releasing"). Credentials come from the maintainer's
      password manager, exported as `WEB_EXT_API_KEY` / `WEB_EXT_API_SECRET`;
      never write them to disk or into the repo.
-  5. The signed `.xpi` lands in `web-ext-artifacts/` under a hash-based
+  6. The signed `.xpi` lands in `web-ext-artifacts/` under a hash-based
      name; rename it to `zen-space-router-<version>.xpi` and attach it to a
      GitHub release.
 - Signed so far: 0.1.0 (2026-09-08, unlisted, internal — never released
-  publicly), 0.1.1 (2026-09-08, unlisted — first public release).
+  publicly), 0.1.1 (2026-09-08, unlisted — first public release), 0.1.2
+  (2026-09-08, unlisted — first version with `update_url`, for automatic
+  updates).
 - `manifest.json` carries `data_collection_permissions: { required: ["none"] }`
   (required by Mozilla for new extensions) and `strict_min_version` 142
   because that key only exists from Firefox 142.

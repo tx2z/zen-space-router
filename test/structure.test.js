@@ -46,3 +46,51 @@ test("manifest version matches package.json version", () => {
   const pkg = readJson("package.json");
   assert.equal(manifest.version, pkg.version);
 });
+
+test("updates.json parses as valid JSON", () => {
+  assert.doesNotThrow(() => readJson("updates.json"));
+});
+
+test("updates.json has an entry for the manifest's addon id", () => {
+  const manifest = readJson("manifest.json");
+  const updates = readJson("updates.json");
+  const addonId = manifest.browser_specific_settings.gecko.id;
+  assert.ok(updates.addons[addonId], `updates.json must have an entry for ${addonId}`);
+});
+
+test("every updates.json entry has a semver version and a matching https update_link", () => {
+  const manifest = readJson("manifest.json");
+  const updates = readJson("updates.json");
+  const addonId = manifest.browser_specific_settings.gecko.id;
+  const entries = updates.addons[addonId].updates;
+  assert.ok(entries.length > 0, "updates.json must have at least one update entry");
+  const semverRe = /^\d+\.\d+\.\d+$/;
+  for (const entry of entries) {
+    assert.match(entry.version, semverRe, `${entry.version} must be a semver-like version`);
+    assert.match(entry.update_link, /^https:\/\//, `${entry.update_link} must be an https URL`);
+    assert.equal(
+      entry.update_link,
+      `https://github.com/tx2z/zen-space-router/releases/download/v${entry.version}/zen-space-router-${entry.version}.xpi`,
+      `update_link for ${entry.version} must point at the matching release tag and asset name`,
+    );
+  }
+});
+
+test("manifest version is present in updates.json", () => {
+  const manifest = readJson("manifest.json");
+  const updates = readJson("updates.json");
+  const addonId = manifest.browser_specific_settings.gecko.id;
+  const entries = updates.addons[addonId].updates;
+  assert.ok(
+    entries.some((entry) => entry.version === manifest.version),
+    `updates.json must have an entry for the current manifest version (${manifest.version})`,
+  );
+});
+
+test("updates.json versions are unique", () => {
+  const manifest = readJson("manifest.json");
+  const updates = readJson("updates.json");
+  const addonId = manifest.browser_specific_settings.gecko.id;
+  const versions = updates.addons[addonId].updates.map((entry) => entry.version);
+  assert.equal(new Set(versions).size, versions.length, "updates.json must not have duplicate versions");
+});

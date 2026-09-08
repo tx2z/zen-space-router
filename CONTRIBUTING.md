@@ -8,7 +8,7 @@ that way.
 ```
 npm run check   # node --check on every script (incl. probe/background.js) + manifest.json parse
 npm test        # node --test test/*.test.js
-npm run lint    # npx -y web-ext lint --warnings-as-errors
+npm run lint    # npx -y web-ext lint --warnings-as-errors --self-hosted
 ```
 
 Run all three before opening a PR; `npm run check`, `npm test` and

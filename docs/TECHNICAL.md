@@ -138,7 +138,7 @@ tab is not `active`.
 ```
 npm run check   # node --check on every script (incl. probe/background.js) + manifest.json parse
 npm test        # node --test test/*.test.js
-npm run lint    # npx -y web-ext lint --warnings-as-errors
+npm run lint    # npx -y web-ext lint --warnings-as-errors --self-hosted
 npm run build   # npx -y web-ext build, writes web-ext-artifacts/
 ```
 
@@ -161,8 +161,11 @@ logic to it.
    rejects re-signing a version that was already signed, even on the
    unlisted channel).
 2. Update `CHANGELOG.md` with the new version and its date.
-3. `npm run lint` must report 0 errors and 0 warnings.
-4. Export the AMO API key pair from your password manager:
+3. Add the new version to `updates.json` (`version` and `update_link` to
+   the release asset); the `update_link` must match the asset name attached
+   to the GitHub release.
+4. `npm run lint` must report 0 errors and 0 warnings.
+5. Export the AMO API key pair from your password manager:
 
    ```
    export WEB_EXT_API_KEY="$(op read 'op://<vault>/<item>/<field>')"
@@ -171,7 +174,7 @@ logic to it.
 
    The `op` command above is a generic placeholder for whichever password
    manager CLI you use; `web-ext` reads both variables automatically.
-5. Sign the build:
+6. Sign the build:
 
    ```
    npx -y web-ext@8 sign --channel unlisted
@@ -180,9 +183,14 @@ logic to it.
    `unlisted` returns a signed `.xpi` for self-distribution (drag it onto a
    Zen window or open it from `about:addons`). Use `--channel listed` to
    publish on addons.mozilla.org instead.
-6. `web-ext` writes the signed `.xpi` to `web-ext-artifacts/` under a
+7. `web-ext` writes the signed `.xpi` to `web-ext-artifacts/` under a
    hash-based name; rename it to `zen-space-router-<version>.xpi`.
-7. Attach the renamed `.xpi` to a GitHub release.
+8. Attach the renamed `.xpi` to a GitHub release.
+
+Firefox checks `update_url` roughly once a day, and only for installed
+versions whose manifest already contains `update_url`; 0.1.2 is the first
+signed version to carry it, so automatic updates only take effect from that
+version onward.
 
 ## Permissions table
 

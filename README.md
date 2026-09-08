@@ -31,8 +31,8 @@ reload it each session, or package it for permanent installation.
 
 When an external URL has no matching rule, a picker tab opens showing:
 
-- The target URL, with its origin shown separately (and more prominently)
-  from the path and query string.
+- The hostname as the title line, with the full URL underneath as a
+  muted subtitle (hover it to see the whole URL when it is truncated).
 - One row per container, with a colored dot and a key hint (`1`-`9` for the
   first nine containers; extra containers are still clickable).
 - A `0` row for "No container (default)".
@@ -97,8 +97,10 @@ tab is not `active`.
 
 ## Not verified
 
-- `active: false` for external links was only observed using `open` from
-  the macOS terminal, not from Slack, Todoist, or a PDF viewer.
+- `active: false` for external links was observed with `open` from the
+  macOS terminal and with links clicked in Microsoft Teams. Other apps
+  (Slack, Todoist, PDF viewers) are expected to behave the same but were
+  not tested.
 - Behaviour with multiple Zen windows open at once.
 - Whether tabs routed to `firefox-default` (no container) stay in the
   current workspace or move somewhere else.

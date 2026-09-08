@@ -97,12 +97,11 @@ function renderUrlText() {
   const originEl = document.getElementById("origin-text");
   const pathEl = document.getElementById("path-text");
 
-  const origin = stripBidiControls(targetUrl.origin);
-  const pathAndSearch = stripBidiControls(targetUrl.pathname + targetUrl.search + targetUrl.hash);
+  const fullUrl = stripBidiControls(targetUrl.href);
 
-  originEl.textContent = origin;
-  pathEl.textContent = pathAndSearch;
-  originEl.parentElement.title = stripBidiControls(targetUrl.href);
+  originEl.textContent = stripBidiControls(targetUrl.hostname);
+  pathEl.textContent = fullUrl;
+  pathEl.title = fullUrl;
 
   const rememberLabelEl = document.getElementById("remember-label");
   rememberLabelEl.textContent = "Remember for " + targetUrl.hostname;

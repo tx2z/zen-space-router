@@ -103,7 +103,7 @@ body:has(.picker-dialog) {
     min-width: 0;
   }
 
-  .url-line {
+  .host-line {
     font-size: 16px;
   }
 
@@ -113,8 +113,6 @@ body:has(.picker-dialog) {
     gap: 10px;
   }
 }
-
-/* --- Dialog surface --- */
 
 .dialog {
   background: var(--dialog-bg);
@@ -206,27 +204,27 @@ body:has(.picker-dialog) {
   min-width: 0;
 }
 
-.url-line {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  overflow: hidden;
-  overflow-wrap: anywhere;
-  word-break: break-all;
+.host-line {
   margin: 0;
   font-size: 19px;
+  font-weight: 500;
   line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   unicode-bidi: isolate-override;
 }
 
-.origin-text {
-  font-weight: 500;
-}
-
-.path-text {
+.url-line {
+  margin: 2px 0 0;
+  font-size: 13px;
   font-weight: 400;
+  line-height: 1.3;
   opacity: 0.5;
-  margin-left: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  unicode-bidi: isolate-override;
 }
 
 /* --- Hairline separators (picker) --- */

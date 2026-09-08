@@ -7,7 +7,8 @@ metadata:
 
 As of 2026-09-08, version 0.1.0 was signed by Mozilla (unlisted channel) and
 installed permanently in Zen, but was never published as a public release.
-Version 0.1.1 is the first version intended for public release.
+Version 0.1.1 is the first public release: signed, attached to the GitHub
+release v0.1.1, and the repository was made public the same day.
 
 The picker matches Zen's floating URL bar geometry (width = viewport / 1.5
 capped at 750px, centred as if at least 333px tall, taken from

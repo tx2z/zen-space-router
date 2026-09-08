@@ -20,6 +20,6 @@ silent Space Routing stored in `zen-space-routing.jsonlz4` that extensions
 cannot read or write, so the extension's value is the picker and
 remember-by-domain.
 
-See README.md for the current list of what is verified in Zen ("How it
-works" table) and what remains unverified ("Not verified"); this file does
-not duplicate those lists. For the release checklist, see CLAUDE.md.
+See docs/TECHNICAL.md for the current list of what is verified in Zen ("How
+it works" table) and what remains unverified ("Not verified"); this file
+does not duplicate those lists. For the release checklist, see CLAUDE.md.

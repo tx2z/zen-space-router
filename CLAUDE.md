@@ -31,10 +31,12 @@ workspace API, so "open in space X" means opening the tab with the
   `npm run lint` and `npm run build` on push and pull request.
 - `CHANGELOG.md`, `CONTRIBUTING.md`, `SECURITY.md`, `LICENSE` – project
   docs; keep `CHANGELOG.md` updated on every version bump.
-- `docs/` – screenshots and project memory notes (`docs/memory/`).
+- `docs/` – screenshots, `docs/TECHNICAL.md`, and project memory notes
+  (`docs/memory/`).
 - `probe/` – logging-only extension used for the behaviour experiments.
   Keep it; do not add logic to it.
-- `README.md` – install, Zen setup, detection evidence table, and the
+- `README.md` – short, plain-language install and usage guide.
+- `docs/TECHNICAL.md` – how it works, detection evidence table, and the
   "Limitations" / "Not verified" sections. Update those sections whenever a
   behaviour is confirmed or a new assumption is introduced.
 
@@ -89,7 +91,7 @@ workspace API, so "open in space X" means opening the tab with the
   2. `npm run lint` must report 0 errors and 0 warnings.
   3. `npm run build` produces the zip in `web-ext-artifacts/`
      (gitignored); `web-ext-config.mjs` excludes `probe/` and repo metadata.
-  4. Sign with the README command. Credentials come from the maintainer's
+  4. Sign with the command in `docs/TECHNICAL.md` ("Releasing"). Credentials come from the maintainer's
      password manager, exported as `WEB_EXT_API_KEY` / `WEB_EXT_API_SECRET`;
      never write them to disk or into the repo.
   5. The signed `.xpi` lands in `web-ext-artifacts/` under a hash-based

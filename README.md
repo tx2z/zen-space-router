@@ -26,21 +26,26 @@ The options page, listing saved domain rules.
 
 ## Set it up in 5 minutes
 
-1. **Requirements**: Zen built on Firefox 142 or newer. Check
-   `about:support` → "Application Basics" → "Build ID"/"Firefox" version if
-   unsure; older builds refuse to install this extension.
-2. **Install**: download `zen-space-router-<version>.xpi` from the
+1. **Install**: download `zen-space-router-<version>.xpi` from the
    [Releases page](https://github.com/tx2z/zen-space-router/releases), then
    drag it onto a Zen window (or open `about:addons` → the gear menu →
    "Install Add-on From File" and select it). Updates are automatic from
    then on (the extension checks this repository's `updates.json`).
-3. In Zen, give each space a container: open that space's settings and
+2. In Zen, give each space a container: open that space's settings and
    assign it one.
-4. In Zen settings, enable "Switch to workspace where container is set as
-   default when opening container tabs".
-5. Set Zen as your default browser, so external links land in it.
-6. Try it: run `open https://example.com` in a terminal, or click a link
+3. In Zen settings, go to **Tab Management** (or type
+   `about:preferences#zenTabManagement` in the address bar) and enable
+   "Switch to workspace where container is set as default when opening
+   container tabs":
+
+   ![Zen setting to enable](docs/screenshots/zen-setting.png)
+
+4. Set Zen as your default browser, so external links land in it.
+5. Try it: run `open https://example.com` in a terminal, or click a link
    in another app.
+
+Tested on macOS and Linux. Zen must be built on Firefox 142 or newer;
+older builds refuse to install the extension.
 
 ## How to use it
 

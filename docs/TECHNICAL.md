@@ -116,6 +116,8 @@ tab is not `active`.
   macOS terminal and with links clicked in Microsoft Teams. Other apps
   (Slack, Todoist, PDF viewers) are expected to behave the same but were
   not tested.
+- Platforms: the extension was used on macOS and Linux; Windows was not
+  tested.
 - Behaviour with multiple Zen windows open at once.
 - Whether tabs routed to `firefox-default` (no container) stay in the
   current workspace or move somewhere else.

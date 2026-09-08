@@ -1,60 +1,10 @@
 // Lets the user pick which container (Zen workspace proxy) an intercepted
 // URL should open in.
 
-const CONTAINER_COLORS = {
-  blue: "#37adff",
-  turquoise: "#00c79a",
-  green: "#51cd00",
-  yellow: "#ffcb00",
-  orange: "#ff9f00",
-  red: "#ff613d",
-  pink: "#ff4bda",
-  purple: "#af51f5",
-  toolbar: "#7c7c7d",
-  gray: "#7c7c7d",
-  grey: "#7c7c7d",
-};
+const { CONTAINER_COLORS, stripBidiControls, baseDomain } = ZenSpaceRouterLib;
 
 const DEFAULT_COOKIE_STORE_ID = "firefox-default";
 const MAX_KEYED_CONTAINERS = 9;
-
-// Bidi control characters (embeddings/overrides and isolates) that could be
-// used to make a URL render misleadingly; stripped before display.
-const BIDI_CONTROL_CHARS_RE = /[\u202A-\u202E\u2066-\u2069]/g;
-
-function stripBidiControls(text) {
-  return text.replace(BIDI_CONTROL_CHARS_RE, "");
-}
-
-// Second-level suffixes (e.g. "co" in "co.uk") that get an extra label
-// folded into the base domain. Not the public suffix list — just enough to
-// cover common cases; unusual TLD structures may need manual editing on the
-// options page. Kept in sync with the copy in background.js.
-const SECOND_LEVEL_SUFFIXES = ["co", "com", "org", "net", "gov", "edu", "ac", "gob", "or", "ne"];
-
-// Derives the registrable base domain from a hostname: "www.facebook.com"
-// -> "facebook.com", "a.b.example.co.uk" -> "example.co.uk". IPv4/IPv6
-// literals and hostnames with two or fewer labels are returned unchanged.
-function baseDomain(hostname) {
-  if (typeof hostname !== "string" || hostname.length === 0) {
-    return hostname;
-  }
-  if (hostname.includes(":") || /^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) {
-    return hostname;
-  }
-
-  const labels = hostname.split(".");
-  if (labels.length <= 2) {
-    return hostname;
-  }
-
-  const tld = labels[labels.length - 1];
-  const secondLevel = labels[labels.length - 2];
-  if (tld.length === 2 && SECOND_LEVEL_SUFFIXES.includes(secondLevel) && labels.length >= 3) {
-    return labels.slice(-3).join(".");
-  }
-  return labels.slice(-2).join(".");
-}
 
 const params = new URLSearchParams(location.search);
 const rawUrl = params.get("url") || "";

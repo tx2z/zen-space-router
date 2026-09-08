@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Zen Space Router",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Routes incoming URLs to the right Zen workspace via container-tab rules.",
   "homepage_url": "https://github.com/tx2z/zen-space-router",
   "icons": {
@@ -30,6 +30,7 @@
   ],
   "background": {
     "scripts": [
+      "lib/rules.js",
       "background.js"
     ],
     "persistent": true

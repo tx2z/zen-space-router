@@ -57,6 +57,11 @@
   box-sizing: border-box;
 }
 
+/* The hidden attribute always wins over any display value set below. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro", "Segoe UI", Roboto, sans-serif;
@@ -611,6 +616,18 @@ body:has(.picker-dialog) {
   margin-top: 16px;
   padding: 20px 26px;
   gap: 10px;
+}
+
+.sr-about a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+.sr-subtitle {
+  margin: 6px 0 0;
+  font-size: small;
+  font-weight: 600;
+  color: var(--text-color);
 }
 
 .sr-about p {

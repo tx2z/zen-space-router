@@ -4,6 +4,8 @@
 // messages so writes are serialized with any concurrent picker "remember"
 // writes.
 
+const { normalizeDomain } = ZenSpaceRouterLib;
+
 const DEFAULT_COOKIE_STORE_ID = "firefox-default";
 const SVG_NS = "http://www.w3.org/2000/svg";
 
@@ -22,32 +24,6 @@ let listFocused = false;
 // True when a rules change arrived while the list was focused; applied on
 // the next blur out of the list.
 let pendingRulesRerender = false;
-
-// Normalizes a user- or URL-supplied domain string into a bare hostname.
-// Kept in sync with the copy in background.js (no shared modules in MV2).
-function normalizeDomain(raw) {
-  if (typeof raw !== "string") {
-    return null;
-  }
-  let cleaned = raw.trim().toLowerCase();
-  if (!cleaned) {
-    return null;
-  }
-  cleaned = cleaned.replace(/^[a-z][a-z0-9+.-]*:\/\//, "");
-  cleaned = cleaned.replace(/^\.+|\.+$/g, "");
-  if (!cleaned) {
-    return null;
-  }
-  try {
-    const hostname = new URL("http://" + cleaned).hostname;
-    if (!hostname || !/[a-z0-9]/i.test(hostname)) {
-      return null;
-    }
-    return hostname;
-  } catch (err) {
-    return null;
-  }
-}
 
 function errMessage(err) {
   return err && err.message ? err.message : String(err);

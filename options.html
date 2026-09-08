@@ -25,9 +25,8 @@
           <path d="M4 5v14" />
         </svg>
         <p>
-          Rules let you choose which space a site opens in. For example, you
-          can send every facebook.com link straight to your Personal space
-          without being asked. Press R or S in the picker to create one.
+          In the picker, press R (or S for all subdomains) and then choose a
+          space; the rule is saved with your choice.
         </p>
       </div>
     </div>
@@ -51,9 +50,22 @@
   <section class="sr-card sr-about" aria-labelledby="about-title">
     <h2 id="about-title" class="sr-title">About</h2>
     <p>
-      Zen Browser 1.21.16b and newer ships its own <strong>Space Routing</strong>
+      <strong>Built with AI.</strong> Zen Space Router was made by
+      <a href="https://github.com/tx2z">tx2z</a> with substantial help from
+      Claude (Anthropic). It was reviewed and tested by a human in a real Zen
+      Browser, but if you are not comfortable using AI-assisted software,
+      please do not use it.
+    </p>
+    <p>
+      This is a small open-source project for the Zen community. Bug reports,
+      feature requests, pull requests and ideas are welcome on
+      <a href="https://github.com/tx2z/zen-space-router">GitHub</a>.
+    </p>
+    <h3 class="sr-subtitle">Zen's native Space Routing</h3>
+    <p>
+      Recent Zen Browser versions ship their own <strong>Space Routing</strong>
       (Settings &rarr; Spaces). It moves tabs to a space silently, without asking,
-      and runs before this extension sees the tab.
+      and may move the tab before this extension is consulted.
     </p>
     <p>
       To avoid a tab being routed twice, do not create native routes for domains
@@ -61,6 +73,7 @@
       "Most recent Space". This extension cannot read or write Zen's native routes.
     </p>
   </section>
+  <script src="lib/rules.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

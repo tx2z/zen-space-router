@@ -52,3 +52,24 @@ workspace API, so "open in space X" means opening the tab with the
   changes, ask the user to click Reload in `about:debugging`, give exact
   `open https://...` commands, and say which `[zen-space-router]` console
   lines to paste back.
+
+## Releases and signing
+
+- Zen only installs signed extensions permanently. Signing goes through
+  Mozilla (addons.mozilla.org), channel `unlisted` for self-distribution.
+- Release checklist:
+  1. Bump `version` in `manifest.json` (Mozilla rejects a version that was
+     already signed, even for unlisted).
+  2. `npx -y web-ext lint` must report 0 errors and 0 warnings.
+  3. `npx -y web-ext build` produces the zip in `web-ext-artifacts/`
+     (gitignored); `web-ext-config.mjs` excludes `probe/` and repo metadata.
+  4. Sign with the README command; credentials come from 1Password
+     (`op read 'op://Private/Mozilla Add-ons API/username'` = JWT issuer,
+     `.../credential` = JWT secret). Never write them to disk or paste them.
+  5. The signed `.xpi` lands in `web-ext-artifacts/`; copy it to
+     `zen-space-router-<version>.xpi` and attach it to a GitHub release.
+- Signed so far: 0.1.0 (2026-09-08, unlisted).
+- `manifest.json` carries `data_collection_permissions: { required: ["none"] }`
+  (required by Mozilla for new extensions) and `strict_min_version` 142
+  because that key only exists from Firefox 142.
+- `web-ext` is always run via `npx -y`; do not add it as a dependency.

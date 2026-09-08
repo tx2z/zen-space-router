@@ -125,6 +125,39 @@ tab is not `active`.
 - Firefox-restricted domains (`addons.mozilla.org`, `accounts.firefox.com`,
   and similar) cannot be intercepted by any extension, including this one.
 
+## Packaging and signing
+
+Zen, like Firefox, only installs signed extensions permanently. Packaging
+uses Mozilla's `web-ext` tool through `npx`, so nothing is added to the
+repository; `web-ext-config.mjs` holds the shared options.
+
+```
+npx -y web-ext lint    # validation, must report 0 errors
+npx -y web-ext build   # writes web-ext-artifacts/zen_space_router-<version>.zip
+```
+
+To get an installable `.xpi`, sign the build with Mozilla:
+
+1. Create API credentials at
+   https://addons.mozilla.org/developers/addon/api/key/ (requires a Firefox
+   account).
+2. Run the signing command. With the credentials stored in 1Password
+   (item "Mozilla Add-ons API", fields `username` = JWT issuer and
+   `credential` = JWT secret), `op` injects them without writing them to
+   disk:
+
+   ```
+   npx -y web-ext sign --channel unlisted \
+     --api-key "$(op read 'op://Private/Mozilla Add-ons API/username')" \
+     --api-secret "$(op read 'op://Private/Mozilla Add-ons API/credential')"
+   ```
+
+   `unlisted` returns a signed `.xpi` for self-distribution (drag it onto a
+   Zen window or open it from `about:addons`). Use `--channel listed` to
+   publish on addons.mozilla.org instead.
+3. Bump `version` in `manifest.json` before signing again; Mozilla rejects
+   a version that was already signed.
+
 ## Files
 
 - `manifest.json` — extension manifest.
@@ -132,6 +165,8 @@ tab is not `active`.
 - `picker.html` / `picker.js` — the container picker shown when no rule matches.
 - `options.html` / `options.js` — the settings and rules page.
 - `style.css` — shared styling for the picker and options pages.
+- `icons/icon.svg` — extension icon.
+- `web-ext-config.mjs` — packaging options for `web-ext`.
 - `probe/` — a separate, logging-only extension used to gather the
   empirical facts this extension is designed around; not part of the
   router itself.

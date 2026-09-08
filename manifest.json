@@ -3,10 +3,20 @@
   "name": "Zen Space Router",
   "version": "0.1.0",
   "description": "Routes incoming URLs to the right Zen workspace via container-tab rules.",
+  "homepage_url": "https://github.com/tx2z/zen-space-router",
+  "icons": {
+    "48": "icons/icon.svg",
+    "96": "icons/icon.svg"
+  },
   "browser_specific_settings": {
     "gecko": {
       "id": "zen-space-router@caosmental.com",
-      "strict_min_version": "115.0"
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
   },
   "permissions": [
@@ -19,7 +29,9 @@
     "<all_urls>"
   ],
   "background": {
-    "scripts": ["background.js"],
+    "scripts": [
+      "background.js"
+    ],
     "persistent": true
   },
   "options_ui": {

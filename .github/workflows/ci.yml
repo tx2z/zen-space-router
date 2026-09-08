@@ -1,0 +1,36 @@
+name: CI
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm run check
+      - run: npm test
+      - run: npm run lint
+      - run: npm run build
+      - name: Verify packaged zip contents
+        run: |
+          zip_file=$(ls web-ext-artifacts/*.zip)
+          listing=$(unzip -l "$zip_file")
+          echo "$listing"
+          for expected in lib/rules.js background.js picker.js options.js style.css manifest.json icons/icon.svg LICENSE; do
+            echo "$listing" | grep -q "$expected" || { echo "missing $expected from $zip_file"; exit 1; }
+          done
+          for unexpected in "test/" "docs/" "package.json" "README.md"; do
+            if echo "$listing" | grep -q "$unexpected"; then
+              echo "unexpected $unexpected present in $zip_file"
+              exit 1
+            fi
+          done

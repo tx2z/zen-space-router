@@ -1,0 +1,18 @@
+{
+  "name": "zen-space-router",
+  "version": "0.1.1",
+  "description": "Firefox/Zen Browser WebExtension that routes incoming external URLs to a Zen space via container-tab rules.",
+  "private": true,
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tx2z/zen-space-router"
+  },
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "lint": "npx -y web-ext@8 lint --warnings-as-errors",
+    "build": "npx -y web-ext@8 build",
+    "check": "node --check background.js && node --check picker.js && node --check options.js && node --check lib/rules.js && node --check probe/background.js && node -e \"JSON.parse(require('fs').readFileSync('manifest.json'))\""
+  }
+}

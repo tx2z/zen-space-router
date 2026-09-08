@@ -11,6 +11,8 @@ const CONTAINER_COLORS = {
   pink: "#ff4bda",
   purple: "#af51f5",
   toolbar: "#7c7c7d",
+  gray: "#7c7c7d",
+  grey: "#7c7c7d",
 };
 
 const DEFAULT_COOKIE_STORE_ID = "firefox-default";
@@ -94,17 +96,13 @@ function initInvalid() {
 function renderUrlText() {
   const originEl = document.getElementById("origin-text");
   const pathEl = document.getElementById("path-text");
-  const fullUrlEl = document.getElementById("full-url-text");
-  const detailsEl = document.getElementById("full-url-details");
 
   const origin = stripBidiControls(targetUrl.origin);
   const pathAndSearch = stripBidiControls(targetUrl.pathname + targetUrl.search + targetUrl.hash);
-  const fullUrl = stripBidiControls(targetUrl.href);
 
   originEl.textContent = origin;
   pathEl.textContent = pathAndSearch;
-  fullUrlEl.textContent = fullUrl;
-  detailsEl.hidden = pathAndSearch.length === 0;
+  originEl.parentElement.title = stripBidiControls(targetUrl.href);
 
   const rememberLabelEl = document.getElementById("remember-label");
   rememberLabelEl.textContent = "Remember for " + targetUrl.hostname;

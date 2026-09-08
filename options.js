@@ -1,9 +1,11 @@
-// Options page: toggles global behaviour and manages the domain -> container
-// rule table. Toggles write browser.storage.local directly; rule mutations go
-// through the background page's setRule/deleteRule messages so writes are
-// serialized with any concurrent picker "remember" writes.
+// Options page ("Space Router Settings"): manages the global toggles and the
+// domain -> container rule list, styled after Zen's native Space Routing
+// dialog. Rule mutations go through the background page's setRule/deleteRule
+// messages so writes are serialized with any concurrent picker "remember"
+// writes.
 
 const DEFAULT_COOKIE_STORE_ID = "firefox-default";
+const SVG_NS = "http://www.w3.org/2000/svg";
 
 const DEFAULT_SETTINGS = {
   enabled: true,
@@ -13,9 +15,13 @@ const DEFAULT_SETTINGS = {
 
 let containers = [];
 let containersLoadFailed = false;
-// Domain of the rule <select> currently focused, so a re-render triggered by
-// storage.onChanged can restore focus to the equivalent row.
-let focusedRuleDomain = null;
+
+// True while an input/select/button inside the rule list has focus, so a
+// re-render triggered by storage.onChanged never interrupts typing.
+let listFocused = false;
+// True when a rules change arrived while the list was focused; applied on
+// the next blur out of the list.
+let pendingRulesRerender = false;
 
 // Normalizes a user- or URL-supplied domain string into a bare hostname.
 // Kept in sync with the copy in background.js (no shared modules in MV2).
@@ -91,157 +97,224 @@ function buildContainerOptions(selectedCookieStoreId) {
   return fragment;
 }
 
+function buildRemoveIcon() {
+  const svg = document.createElementNS(SVG_NS, "svg");
+  svg.setAttribute("width", "14");
+  svg.setAttribute("height", "14");
+  svg.setAttribute("viewBox", "0 0 14 14");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("focusable", "false");
+
+  for (const [x1, y1, x2, y2] of [
+    ["1", "1", "13", "13"],
+    ["13", "1", "1", "13"],
+  ]) {
+    const line = document.createElementNS(SVG_NS, "line");
+    line.setAttribute("x1", x1);
+    line.setAttribute("y1", y1);
+    line.setAttribute("x2", x2);
+    line.setAttribute("y2", y2);
+    line.setAttribute("stroke", "currentColor");
+    line.setAttribute("stroke-width", "1.5");
+    line.setAttribute("stroke-linecap", "round");
+    svg.appendChild(line);
+  }
+
+  return svg;
+}
+
 function showFatalError(text) {
   const el = document.getElementById("fatal-error-text");
   el.textContent = text;
   el.hidden = false;
 }
 
-function setAddFormDisabled(disabled) {
-  document.getElementById("new-domain-input").disabled = disabled;
-  document.getElementById("new-container-select").disabled = disabled;
-  document.getElementById("add-rule-button").disabled = disabled;
+function setControlsDisabled(disabled) {
+  document.getElementById("new-rule-button").disabled = disabled;
+  document.querySelectorAll("#rules-list select").forEach((select) => {
+    select.disabled = disabled;
+  });
 }
 
-async function loadToggles() {
-  const settings = await getSettings();
-  document.getElementById("enabled-checkbox").checked = settings.enabled;
-  document.getElementById("route-typed-checkbox").checked = settings.routeTypedUrls;
+function updateEmptyState() {
+  const rulesListEl = document.getElementById("rules-list");
+  document.getElementById("empty-state").hidden = rulesListEl.children.length > 0;
 }
 
-// Compares the rules table already rendered in the DOM against a freshly
-// read rules map, so a re-render caused by our own write (the <select>
-// already shows the new value) can be skipped.
-function rulesMatchRenderedTable(newRules) {
-  const tbody = document.getElementById("rules-tbody");
-  const rows = Array.from(tbody.querySelectorAll("tr"));
-  const newDomains = Object.keys(newRules);
-
-  if (rows.length !== newDomains.length) {
-    return false;
+// Builds one editable rule row. domain is "" for a not-yet-saved new row.
+function createRuleRow(domain, cookieStoreId) {
+  const row = document.createElement("div");
+  row.className = "sr-rule-row";
+  row.dataset.committedDomain = domain || "";
+  if (domain && cookieStoreId !== DEFAULT_COOKIE_STORE_ID && containerName(cookieStoreId) === null) {
+    row.title = "This rule points to a container that no longer exists.";
   }
 
-  for (const row of rows) {
-    const domain = row.querySelector("td").textContent;
-    const select = row.querySelector("select");
-    if (!Object.prototype.hasOwnProperty.call(newRules, domain) || select.value !== newRules[domain]) {
-      return false;
-    }
-  }
-  return true;
-}
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "input";
+  input.value = domain || "";
+  input.placeholder = "example.com";
+  input.autocomplete = "off";
+  input.autocapitalize = "off";
+  input.spellcheck = false;
+  input.setAttribute("inputmode", "url");
+  input.setAttribute("aria-label", "Domain");
 
-async function renderRulesTable() {
-  const settings = await getSettings();
-  const tbody = document.getElementById("rules-tbody");
-  tbody.textContent = "";
+  const select = document.createElement("select");
+  select.className = "select";
+  select.setAttribute("aria-label", domain ? "Container for " + domain : "Container for new rule");
+  select.appendChild(buildContainerOptions(cookieStoreId));
+  select.value = cookieStoreId;
+  select.disabled = containersLoadFailed;
 
-  for (const [domain, cookieStoreId] of Object.entries(settings.rules)) {
-    const row = document.createElement("tr");
-    const isUnknown = cookieStoreId !== DEFAULT_COOKIE_STORE_ID && containerName(cookieStoreId) === null;
-    if (isUnknown) {
-      row.title = "This rule points to a container that no longer exists.";
-    }
+  const removeButton = document.createElement("button");
+  removeButton.type = "button";
+  removeButton.className = "sr-remove-button";
+  removeButton.setAttribute("aria-label", domain ? "Remove rule for " + domain : "Remove new rule");
+  removeButton.appendChild(buildRemoveIcon());
 
-    const domainCell = document.createElement("td");
-    domainCell.textContent = domain;
-    row.appendChild(domainCell);
+  // Commits the input on Enter or blur: normalizes the domain, then swaps
+  // the old rule for the new one (or discards an empty unsaved row).
+  async function commitDomain() {
+    input.classList.remove("invalid");
+    const raw = input.value;
+    const committed = row.dataset.committedDomain;
 
-    const containerCell = document.createElement("td");
-    const select = document.createElement("select");
-    select.className = "select";
-    select.setAttribute("aria-label", "Container for " + domain);
-    select.dataset.domain = domain;
-    select.appendChild(buildContainerOptions(cookieStoreId));
-    select.value = cookieStoreId;
-    select.addEventListener("focus", () => {
-      focusedRuleDomain = domain;
-    });
-    select.addEventListener("blur", () => {
-      if (focusedRuleDomain === domain) {
-        focusedRuleDomain = null;
+    if (!raw.trim()) {
+      if (!committed) {
+        row.remove();
+        updateEmptyState();
       }
-    });
-    select.addEventListener("change", async () => {
-      const response = await browser.runtime.sendMessage({
-        type: "setRule",
-        domain,
-        cookieStoreId: select.value,
-      });
-      if (!response || response.ok === false) {
-        showFatalError((response && response.error) || "Could not save the rule.");
-      }
-    });
-    containerCell.appendChild(select);
-    row.appendChild(containerCell);
-
-    const deleteCell = document.createElement("td");
-    const deleteButton = document.createElement("button");
-    deleteButton.type = "button";
-    deleteButton.className = "btn btn-ghost btn-danger";
-    deleteButton.textContent = "Delete";
-    deleteButton.setAttribute("aria-label", "Delete rule for " + domain);
-    deleteButton.addEventListener("click", async () => {
-      if (!confirm(`Delete the rule for ${domain}?`)) {
-        return;
-      }
-      const response = await browser.runtime.sendMessage({ type: "deleteRule", domain });
-      if (!response || response.ok === false) {
-        showFatalError((response && response.error) || "Could not delete the rule.");
-      }
-    });
-    deleteCell.appendChild(deleteButton);
-    row.appendChild(deleteCell);
-
-    tbody.appendChild(row);
-  }
-}
-
-function renderNewContainerSelect() {
-  const select = document.getElementById("new-container-select");
-  select.textContent = "";
-  select.appendChild(buildContainerOptions(null));
-}
-
-async function handleAddRuleSubmit(event) {
-  event.preventDefault();
-
-  const domainInput = document.getElementById("new-domain-input");
-  const containerSelect = document.getElementById("new-container-select");
-  const errorEl = document.getElementById("add-rule-error-text");
-
-  errorEl.hidden = true;
-  domainInput.removeAttribute("aria-invalid");
-
-  const domain = normalizeDomain(domainInput.value);
-  const isSingleLabel = domain !== null && domain.indexOf(".") === -1;
-  if (!domain || (isSingleLabel && domain !== "localhost")) {
-    domainInput.setAttribute("aria-invalid", "true");
-    errorEl.textContent = "Enter a valid domain, e.g. example.com.";
-    errorEl.hidden = false;
-    return;
-  }
-
-  const settings = await getSettings();
-  if (Object.prototype.hasOwnProperty.call(settings.rules, domain)) {
-    const replace = confirm(`A rule for ${domain} already exists. Replace it?`);
-    if (!replace) {
       return;
     }
+
+    const normalized = normalizeDomain(raw);
+    const isSingleLabel = normalized !== null && normalized.indexOf(".") === -1;
+    if (!normalized || (isSingleLabel && normalized !== "localhost")) {
+      input.classList.add("invalid");
+      return;
+    }
+
+    input.value = normalized;
+    if (normalized === committed) {
+      return;
+    }
+
+    if (committed) {
+      const deleteResponse = await browser.runtime.sendMessage({ type: "deleteRule", domain: committed });
+      if (!deleteResponse || deleteResponse.ok === false) {
+        showFatalError((deleteResponse && deleteResponse.error) || "Could not save the rule.");
+        return;
+      }
+    }
+    const setResponse = await browser.runtime.sendMessage({
+      type: "setRule",
+      domain: normalized,
+      cookieStoreId: select.value,
+    });
+    if (!setResponse || setResponse.ok === false) {
+      showFatalError((setResponse && setResponse.error) || "Could not save the rule.");
+      return;
+    }
+
+    row.dataset.committedDomain = normalized;
+    row.title = "";
+    select.setAttribute("aria-label", "Container for " + normalized);
+    removeButton.setAttribute("aria-label", "Remove rule for " + normalized);
   }
 
-  const response = await browser.runtime.sendMessage({
-    type: "setRule",
-    domain,
-    cookieStoreId: containerSelect.value,
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      input.blur();
+    }
   });
-  if (!response || response.ok === false) {
-    errorEl.textContent = (response && response.error) || "Could not save the rule.";
-    errorEl.hidden = false;
+  input.addEventListener("blur", commitDomain);
+
+  select.addEventListener("change", async () => {
+    const committed = row.dataset.committedDomain;
+    if (!committed) {
+      return;
+    }
+    const response = await browser.runtime.sendMessage({
+      type: "setRule",
+      domain: committed,
+      cookieStoreId: select.value,
+    });
+    if (!response || response.ok === false) {
+      showFatalError((response && response.error) || "Could not save the rule.");
+    }
+  });
+
+  removeButton.addEventListener("click", async () => {
+    const committed = row.dataset.committedDomain;
+    if (!committed) {
+      row.remove();
+      updateEmptyState();
+      return;
+    }
+    if (!confirm(`Delete the rule for ${committed}?`)) {
+      return;
+    }
+    const response = await browser.runtime.sendMessage({ type: "deleteRule", domain: committed });
+    if (!response || response.ok === false) {
+      showFatalError((response && response.error) || "Could not delete the rule.");
+    }
+  });
+
+  row.appendChild(input);
+  row.appendChild(select);
+  row.appendChild(removeButton);
+  return row;
+}
+
+function captureListFocus() {
+  const active = document.activeElement;
+  const row = active && active.closest ? active.closest(".sr-rule-row") : null;
+  if (!row) {
+    return null;
+  }
+  return {
+    domain: row.dataset.committedDomain,
+    field: active.tagName === "SELECT" ? "select" : "input",
+  };
+}
+
+function restoreListFocus(focusInfo) {
+  if (!focusInfo || !focusInfo.domain) {
     return;
   }
+  for (const row of document.querySelectorAll(".sr-rule-row")) {
+    if (row.dataset.committedDomain === focusInfo.domain) {
+      const el = focusInfo.field === "select" ? row.querySelector("select") : row.querySelector(".input");
+      if (el) {
+        el.focus();
+      }
+      break;
+    }
+  }
+}
 
-  domainInput.value = "";
+async function renderRulesList(preserveFocus) {
+  const settings = await getSettings();
+  const rulesListEl = document.getElementById("rules-list");
+
+  const focusInfo = preserveFocus ? captureListFocus() : null;
+
+  rulesListEl.textContent = "";
+  for (const [domain, cookieStoreId] of Object.entries(settings.rules)) {
+    rulesListEl.appendChild(createRuleRow(domain, cookieStoreId));
+  }
+
+  updateEmptyState();
+  restoreListFocus(focusInfo);
+}
+
+async function loadFooter() {
+  const settings = await getSettings();
+  document.getElementById("unmatched-select").value = settings.enabled ? "ask" : "leave";
+  document.getElementById("route-typed-checkbox").checked = settings.routeTypedUrls;
 }
 
 function handleStorageChanged(changes, areaName) {
@@ -249,40 +322,58 @@ function handleStorageChanged(changes, areaName) {
     return;
   }
   if (changes.enabled) {
-    document.getElementById("enabled-checkbox").checked = changes.enabled.newValue;
+    document.getElementById("unmatched-select").value = changes.enabled.newValue ? "ask" : "leave";
   }
   if (changes.routeTypedUrls) {
     document.getElementById("route-typed-checkbox").checked = changes.routeTypedUrls.newValue;
   }
   if (changes.rules) {
-    const newRules =
-      changes.rules.newValue && typeof changes.rules.newValue === "object" ? changes.rules.newValue : {};
-    if (!rulesMatchRenderedTable(newRules)) {
-      const domainToRestore = focusedRuleDomain;
-      renderRulesTable().then(() => {
-        if (domainToRestore) {
-          const select = document.querySelector(
-            'select[data-domain="' + CSS.escape(domainToRestore) + '"]'
-          );
-          if (select) {
-            select.focus();
-          }
-        }
-      });
+    if (listFocused) {
+      pendingRulesRerender = true;
+      return;
     }
+    renderRulesList(true);
   }
 }
 
 function attachEventListeners() {
-  document.getElementById("enabled-checkbox").addEventListener("change", async (event) => {
-    await browser.storage.local.set({ enabled: event.target.checked });
+  document.getElementById("new-rule-button").addEventListener("click", () => {
+    if (containersLoadFailed) {
+      return;
+    }
+    const defaultCookieStoreId = containers.length > 0 ? containers[0].cookieStoreId : DEFAULT_COOKIE_STORE_ID;
+    const row = createRuleRow("", defaultCookieStoreId);
+    document.getElementById("rules-list").appendChild(row);
+    updateEmptyState();
+    row.querySelector(".input").focus();
+  });
+
+  document.getElementById("unmatched-select").addEventListener("change", async (event) => {
+    await browser.storage.local.set({ enabled: event.target.value === "ask" });
   });
 
   document.getElementById("route-typed-checkbox").addEventListener("change", async (event) => {
     await browser.storage.local.set({ routeTypedUrls: event.target.checked });
   });
 
-  document.getElementById("add-rule-form").addEventListener("submit", handleAddRuleSubmit);
+  const rulesListEl = document.getElementById("rules-list");
+  rulesListEl.addEventListener("focusin", () => {
+    listFocused = true;
+  });
+  rulesListEl.addEventListener("focusout", () => {
+    // Deferred so a focus move between two controls in the same row (e.g.
+    // input -> select) is not mistaken for leaving the list.
+    setTimeout(() => {
+      if (rulesListEl.contains(document.activeElement)) {
+        return;
+      }
+      listFocused = false;
+      if (pendingRulesRerender) {
+        pendingRulesRerender = false;
+        renderRulesList(true);
+      }
+    }, 0);
+  });
 
   browser.storage.onChanged.addListener(handleStorageChanged);
 }
@@ -295,15 +386,15 @@ async function init() {
       containers = await browser.contextualIdentities.query({});
     } catch (err) {
       containersLoadFailed = true;
-      showFatalError("Could not load containers: " + errMessage(err));
-      setAddFormDisabled(true);
+      showFatalError("Container list could not be loaded: " + errMessage(err));
     }
 
-    await loadToggles();
-    if (!containersLoadFailed) {
-      renderNewContainerSelect();
+    await loadFooter();
+    await renderRulesList(false);
+
+    if (containersLoadFailed) {
+      setControlsDisabled(true);
     }
-    await renderRulesTable();
   } catch (err) {
     showFatalError("Failed to initialize the options page: " + errMessage(err));
   }

@@ -19,8 +19,19 @@
   --border-contrast: rgba(0, 0, 0, 0.25);
   --key-chip-bg: rgba(0, 0, 0, 0.12);
 
-  --btn-primary-bg: #1c1c1c;
-  --btn-primary-text: #fafbff;
+  /* Options page tokens, taken from Zen's zen-space-routing.css. */
+  --background-color-canvas: light-dark(white, #212223);
+  --select-background-color: light-dark(#eceef0, #3e3f43);
+  --input-background-color: light-dark(#f1f2f4, #2c2d31);
+  --hr-color: light-dark(#cdced4, #313235);
+  --text-color: light-dark(#4c4c4c, #dbdcdf);
+  --text-color-secondary: light-dark(#5c5e65, #8b8e98);
+  --text-color-error: light-dark(#9d2222, #d03535);
+  --sr-width: 510px;
+  --sr-height: 500px;
+  --content-padding: 26px;
+  --rules-gap: 14px;
+  --sr-border-radius: 12px;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -39,9 +50,6 @@
     --danger: #ff6a6a;
     --border-contrast: rgba(255, 255, 255, 0.3);
     --key-chip-bg: rgba(255, 255, 255, 0.18);
-
-    --btn-primary-bg: #dddddd;
-    --btn-primary-text: #1c1c1c;
   }
 }
 
@@ -62,6 +70,12 @@ body {
   padding: 24px;
 }
 
+/* Options page: stacks the settings card and the About card vertically. */
+body:has(.sr-card) {
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
 /* Picker page: mimics Zen's floating URL bar. The popup is centred in the
    viewport as if it were at least 333px tall, matching ZenUIManager's
    --zen-urlbar-top formula. */
@@ -78,7 +92,26 @@ body:has(.picker-dialog) {
   align-items: stretch;
   justify-content: flex-start;
   min-height: 333px;
-  width: min(calc(100vw / 1.5), 750px);
+  width: clamp(320px, calc(100vw / 1.5), 750px);
+  max-width: calc(100vw - 24px);
+}
+
+/* Narrow viewports: the picker fills the width and text scales down. */
+@media (max-width: 560px) {
+  .picker-slot {
+    width: calc(100vw - 16px);
+    min-width: 0;
+  }
+
+  .url-line {
+    font-size: 16px;
+  }
+
+  .bottom-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
 }
 
 /* --- Dialog surface --- */
@@ -102,10 +135,6 @@ body:has(.picker-dialog) {
     outline: 1px solid rgba(168, 168, 169, 0.5);
     outline-offset: -2px;
   }
-}
-
-.options-dialog {
-  max-width: 640px;
 }
 
 .picker-dialog {
@@ -178,47 +207,26 @@ body:has(.picker-dialog) {
 }
 
 .url-line {
-  display: flex;
-  align-items: baseline;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 4;
   overflow: hidden;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  word-break: break-all;
   margin: 0;
+  font-size: 19px;
+  line-height: 1.3;
+  unicode-bidi: isolate-override;
 }
 
 .origin-text {
-  font-size: 19px;
   font-weight: 500;
-  flex-shrink: 0;
-  margin: 0;
-  unicode-bidi: isolate-override;
 }
 
 .path-text {
-  font-size: 19px;
   font-weight: 400;
   opacity: 0.5;
-  margin: 0 0 0 2px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.full-url-text {
-  font-size: 12px;
-  color: var(--text-muted);
-  word-break: break-all;
-  margin: 4px 0 0;
-  unicode-bidi: isolate-override;
-}
-
-.full-url-details {
-  margin-top: 4px;
-}
-
-.full-url-details summary {
-  font-size: 12px;
-  color: var(--text-muted);
-  cursor: pointer;
+  margin-left: 2px;
 }
 
 /* --- Hairline separators (picker) --- */
@@ -371,9 +379,12 @@ body:has(.picker-dialog) {
 }
 
 .key-chip--sm {
-  width: 22px;
+  width: auto;
+  min-width: 22px;
   height: 22px;
+  padding: 0 7px;
   font-size: 12px;
+  letter-spacing: 0.02em;
   color: var(--text-muted);
 }
 
@@ -406,19 +417,6 @@ body:has(.picker-dialog) {
   scale: 0.98;
 }
 
-.btn-primary {
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-}
-
-.btn-primary:hover {
-  opacity: 0.95;
-}
-
-.btn-primary:active {
-  opacity: 0.9;
-}
-
 .btn-ghost {
   background: color-mix(in srgb, currentColor, transparent 90%);
   color: var(--text);
@@ -432,10 +430,6 @@ body:has(.picker-dialog) {
   background: color-mix(in srgb, currentColor, transparent 90%);
 }
 
-.btn-danger:hover {
-  color: var(--danger);
-}
-
 :focus-visible {
   outline: 2px solid var(--border-contrast);
   outline-offset: 2px;
@@ -445,127 +439,230 @@ body:has(.picker-dialog) {
   outline: none;
 }
 
-/* --- Options page --- */
+/* --- Options page (Zen "Space Routing Settings" look) --- */
 
-.options-section {
+.sr-card {
+  width: min(var(--sr-width), 100%);
+  height: var(--sr-height);
+  background: var(--background-color-canvas);
+  border: 0.5px solid var(--dialog-border);
+  border-radius: var(--sr-border-radius);
+  box-shadow: var(--dialog-shadow);
+  font-family: system-ui;
+  color: var(--text-color);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
 }
 
-.options-section + .options-section {
-  padding-top: 1.4rem;
-  border-top: 1px solid var(--hairline);
-}
-
-.section-title {
-  font-size: 13px;
-  font-weight: 600;
-  opacity: 0.6;
-  margin: 0 0 0.2rem;
-}
-
-.toggle-row {
+.sr-header {
+  padding: 26px 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--hairline);
 }
 
-.toggle-row:last-of-type {
-  border-bottom: none;
+.sr-title {
+  margin: 0;
+  flex-grow: 1;
+  font-size: medium;
+  font-weight: normal;
+  color: var(--text-color);
 }
 
-.toggle-row label {
+.sr-chip-button {
+  border: none;
+  border-radius: 8px;
+  padding: 4px 10px;
+  background: var(--select-background-color);
+  color: var(--text-color);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.sr-chip-button:hover {
+  opacity: 0.85;
+}
+
+.sr-chip-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.sr-alert {
+  margin: 0 20px 12px;
+}
+
+.sr-hr {
+  margin: 0 22px;
+  border: 0;
+  border-top: 0.5px solid var(--hr-color);
+}
+
+.sr-content {
+  padding: var(--content-padding);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.sr-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--rules-gap);
+}
+
+.sr-rule-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sr-rule-row .input {
+  flex-grow: 1;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  background: var(--input-background-color);
+  color: var(--text-color);
+  font: inherit;
   font-size: 14px;
 }
 
-.toggle-row input[type="checkbox"] {
-  accent-color: var(--accent);
-  width: 15px;
-  height: 15px;
-  margin: 0;
-  flex-shrink: 0;
-}
-
-.option-hint {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin: 0;
-}
-
-.rules-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.rules-table th,
-.rules-table td {
-  text-align: left;
-  padding: 0.5rem 0.4rem;
-  border-bottom: 1px solid var(--hairline);
-  font-size: 13px;
-}
-
-.rules-table th {
-  font-size: 12px;
-  font-weight: 600;
-  opacity: 0.6;
-}
-
-.rules-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.add-rule-form {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.input-wrap {
-  flex: 1;
-  min-width: 160px;
-  background: var(--input-surface);
-  border: 1px solid var(--input-border);
-  border-radius: 10px;
-  corner-shape: superellipse(1.3);
-  padding: 0 0.6rem;
-}
-
-.input-wrap input[type="text"] {
-  width: 100%;
-  padding: 0.5rem 0;
-  border: none;
-  background: transparent;
-  color: var(--text);
-  font: inherit;
-}
-
-.input-wrap input[type="text"]:focus {
+.sr-rule-row .input:focus {
   outline: none;
 }
 
-.input-wrap:has(input[aria-invalid="true"]) {
-  border-color: var(--danger);
+.sr-rule-row .input.invalid {
+  text-decoration: underline wavy var(--text-color-error);
+}
+
+.sr-remove-button {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.sr-remove-button svg {
+  opacity: 0.5;
+}
+
+.sr-remove-button:hover {
+  background: var(--select-background-color);
+}
+
+.sr-remove-button:hover svg {
+  opacity: 0.8;
+}
+
+.sr-empty {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  text-align: center;
+}
+
+.sr-empty svg {
+  width: 75px;
+  height: 75px;
+  color: var(--text-color-secondary);
+  opacity: 0.65;
+}
+
+.sr-empty p {
+  margin: 0;
+  max-width: 380px;
+  font-size: small;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.sr-footer {
+  padding: 26px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sr-footer-label {
+  font-size: small;
+  color: var(--text-color-secondary);
+}
+
+.sr-footer-select {
+  width: 165px;
+  font-weight: 600;
+}
+
+/* Secondary card under the settings card holding the About note. */
+.sr-about {
+  height: auto;
+  margin-top: 16px;
+  padding: 20px 26px;
+  gap: 10px;
+}
+
+.sr-about p {
+  margin: 0;
+  font-size: small;
+  line-height: 1.5;
+  color: var(--text-color-secondary);
+}
+
+.sr-footer-row {
+  padding: 0 26px 26px;
+  display: flex;
+  align-items: center;
+}
+
+.sr-checkbox-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: small;
+  color: var(--text-color-secondary);
+  cursor: pointer;
+}
+
+.sr-checkbox-field input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 14px;
+  height: 14px;
+  margin: 0;
 }
 
 .select {
-  padding: 0.5rem 1.8rem 0.5rem 0.6rem;
-  border: 1px solid var(--input-border);
-  border-radius: 10px;
-  corner-shape: superellipse(1.3);
-  background-color: var(--input-surface);
-  color: var(--text);
+  width: 165px;
+  height: 26px;
+  padding: 4px 24px 4px 8px;
+  border: none;
+  border-radius: 6px;
+  background-color: var(--select-background-color);
+  color: var(--text-color);
   font: inherit;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%23808080' stroke-width='1.5' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.6rem center;
+  background-position: right 8px center;
   background-size: 10px 6px;
+}
+
+.select:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .visually-hidden {
@@ -578,4 +675,26 @@ body:has(.picker-dialog) {
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* Narrow viewports: the settings card grows with its content instead of
+   keeping Zen's fixed dialog height. */
+@media (max-width: 560px) {
+  body:has(.sr-card) {
+    padding: 12px;
+  }
+
+  .sr-card {
+    height: auto;
+    min-height: 0;
+  }
+
+  .sr-content {
+    max-height: 60vh;
+  }
+
+  .sr-footer {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
 }

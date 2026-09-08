@@ -56,9 +56,24 @@ short built-in list of second-level suffixes (e.g. `co.uk`), not the
 public suffix list, so unusual TLD structures may need manual editing on
 the options page.
 
-The options page (accessible from `about:addons`) lets you enable/disable
-routing, toggle routing of typed URLs, and manage the domain → container
-rule table directly.
+The options page (accessible from `about:addons`) looks like Zen's own
+"Space Routing Settings" dialog. Each row is a domain rule: an editable
+domain field, a container dropdown, and a remove button; edits save as you
+type (Enter or clicking away) or as soon as you change the dropdown. "New
+rule" adds a blank row; leaving it empty discards it. The footer has an
+"Unmatched external links" dropdown ("Ask me" vs. "Leave in current
+space", i.e. the enable/disable toggle) and the "Also ask for URLs typed
+into a new tab" checkbox.
+
+### Zen's native Space Routing
+
+Zen ≥ 1.21.16b (August 2026) ships its own built-in Space Routing, which
+silently moves a tab to a space with no picker. To avoid double routing, do
+not create a native Zen route for a domain that already has a rule here,
+and leave Zen's "Default route for external links" setting on "Most recent
+Space". This extension's value over the native feature is the picker (for
+domains with no rule yet) and the remember-by-domain workflow that builds
+the rule table for you.
 
 ## How detection works
 
